@@ -1,10 +1,19 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+const mysql = require("mysql2");
 const ordenesRoutes = require("./routes/ordenesRoutes"); // Importar las rutas
 
 // Crear la aplicación de Express
 const app = express();
+
+// Configuración de la conexión a MySQL (con Sequelize ya no es necesario usar mysql2 directamente)
+const { Sequelize } = require("sequelize");
+
+const sequelize = new Sequelize("ordenesdb", "root", "root", {
+  host: "localhost",
+  dialect: "mysql",
+  logging: false, // Desactivar el logging SQL si no lo necesitas
+});
 
 // Middleware para parsear datos
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,18 +26,18 @@ app.set("views", "./src/views"); // Ruta de las vistas
 // Configurar archivos estáticos
 app.use(express.static("public"));
 
-// Conectar a MongoDB
-mongoose
-  .connect("mongodb://localhost:27017/ordenesDB", { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Conectado a MongoDB"))
-  .catch((err) => console.error("Error al conectar a MongoDB:", err));
-
 // Rutas principales
 app.use("/ordenes", ordenesRoutes); // Prefijo para las rutas relacionadas con órdenes
 
-// Ruta base (inicio)
-app.get("/", (req, res) => {
-  res.send("Bienvenido a la API de Órdenes de Servicio");
+// Ruta principal para mostrar las órdenes
+app.get("/", async (req, res) => {
+  try {
+    const [results] = await sequelize.query("SELECT * FROM ordenes"); // Usando Sequelize para obtener las órdenes
+    res.render("crud", { ordenes: results });
+  } catch (err) {
+    console.error("Error al obtener las órdenes: ", err);
+    res.status(500).send("Error al obtener las órdenes.");
+  }
 });
 
 // Iniciar servidor

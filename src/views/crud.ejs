@@ -1,0 +1,150 @@
+<!-- Archivo: crud.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Órdenes</title>
+  <link rel="stylesheet" href="/css/desing_crud.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Listado de Órdenes</h1>
+      <button id="openModalButton" class="btn">+ Crear nueva orden</button>
+    </header>
+
+    <table class="modern-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Responsable</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody">
+        <!-- Aquí renderizas las órdenes con EJS -->
+        <% ordenes.forEach(function(order) { %>
+          <tr>
+            <td><%= order.empresa %></td>
+            <td><%= order.responsable %></td>
+            <td><%= new Date(order.fecha).toLocaleDateString() %></td>
+            <td>
+              <a href="/ordenes/edit/<%= order.id %>" class="edit-btn">Editar</a>
+              <form action="/ordenes/delete/<%= order.id %>" method="POST" style="display:inline;">
+                <button type="submit" class="delete-btn">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Ventana Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nueva Orden</h2>
+        <button class="close-btn" id="closeModalButton">&times;</button>
+      </div>
+      <form id="orderForm" action="/ordenes" method="POST">
+        <div class="form-group">
+          <label for="empresa">Empresa:</label>
+          <input type="text" id="empresa" name="empresa" required>
+        </div>
+        <div class="form-group">
+          <label for="responsable">Responsable:</label>
+          <input type="text" id="responsable" name="responsable" required>
+        </div>
+        <div class="form-group">
+          <label for="problematica">Problemática:</label>
+          <textarea id="problematica" name="problematica" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="servicios_realizados">Servicios Realizados:</label>
+          <textarea id="servicios_realizados" name="servicios_realizados" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha:</label>
+          <input type="date" id="fecha" name="fecha" required>
+        </div>
+        <div class="form-group">
+          <label for="hora_inicio">Hora de Inicio:</label>
+          <input type="time" id="hora_inicio" name="hora_inicio" required>
+        </div>
+        <div class="form-group">
+          <label for="hora_termino">Hora de Término:</label>
+          <input type="time" id="hora_termino" name="hora_termino" required>
+        </div>
+        <div class="form-group">
+          <label for="nivel_satisfaccion">Nivel de Satisfacción:</label>
+          <select id="nivel_satisfaccion" name="nivel_satisfaccion" required>
+            <option value=""></option>
+            <option value="Malo">Malo</option>
+            <option value="Regular">Regular</option>
+            <option value="Bueno">Bueno</option>
+            <option value="Excelente">Excelente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="problema_solucionado">Problema Solucionado:</label>
+          <input type="checkbox" id="problema_solucionado" name="problema_solucionado">
+        </div>
+        <div class="form-group">
+          <label for="nombre_cliente">Nombre del Cliente:</label>
+          <input type="text" id="nombre_cliente" name="nombre_cliente" required>
+        </div>
+        <div class="form-group">
+          <label for="firma_cliente">Firma del Cliente:</label>
+          <div id="signature-pad">
+            <canvas id="signatureCanvas" width="400" height="150"></canvas>
+          </div>
+          <input type="hidden" name="firma_cliente" id="firma_cliente" />
+        </div>
+        <button type="submit" class="btn-submit">Guardar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Mostrar la ventana modal para crear una nueva orden
+    document.getElementById("openModalButton").addEventListener("click", () => {
+      document.getElementById("modal").classList.add("show");
+    });
+
+    // Cerrar la ventana modal
+    document.getElementById("closeModalButton").addEventListener("click", () => {
+      document.getElementById("modal").classList.remove("show");
+    });
+
+    // Función para capturar la firma
+    const canvas = document.getElementById('signatureCanvas');
+    const context = canvas.getContext('2d');
+    let isDrawing = false;
+
+    canvas.addEventListener('mousedown', (event) => {
+      isDrawing = true;
+      context.moveTo(event.offsetX, event.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', (event) => {
+      if (isDrawing) {
+        context.lineTo(event.offsetX, event.offsetY);
+        context.stroke();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+      document.getElementById('firma_cliente').value = canvas.toDataURL(); // Guarda la firma en base64
+    });
+
+    canvas.addEventListener('mouseout', () => {
+      isDrawing = false;
+    });
+  </script>
+</body>
+</html>
