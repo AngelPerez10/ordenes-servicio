@@ -119,7 +119,7 @@ app.post(
         hora_inicio,
         hora_termino,
         nivel_satisfaccion,
-        problemaSolucionado,
+        problema_solucionado,
         telefono_cliente,
         nombre_encargado,
         nombre_cliente,
