@@ -1,3 +1,5 @@
+//Archivo principal: src/app.js
+
 // Importar las dependencias necesarias
 const express = require("express");
 const multer = require("multer");
@@ -136,22 +138,90 @@ app.post(
   }
 );
 
-// Ruta para mostrar el formulario de edición de una orden
-app.get("/ordenes/edit/:id", (req, res) => {
+// Ruta para editar una orden existente (GET)
+app.get("/ordenes/:id/editar", (req, res) => {
   const { id } = req.params;
-
-  const query = "SELECT * FROM ordenes WHERE id = ?";
-  db.query(query, [id], (err, result) => {
+  db.query("SELECT * FROM ordenes WHERE id = ?", [id], (err, result) => {
     if (err) {
-      console.error("Error al obtener los datos de la orden:", err);
-      res.status(500).send("Error al obtener los datos de la orden.");
-    } else if (result.length === 0) {
-      res.status(404).send("Orden no encontrada.");
+      console.error("Error al obtener la orden:", err);
+      res.status(500).send("Error al obtener la orden.");
     } else {
-      res.render("editOrder", { order: result[0] }); // Renderiza la vista con los datos de la orden
+      res.render("crud", { ordenes: result });
     }
   });
 });
+
+// Ruta para actualizar una orden existente (POST)
+app.post(
+  "/ordenes/:id/editar",
+  upload.fields([{ name: "foto_inicio" }, { name: "foto_fin" }]),
+  (req, res) => {
+    const { id } = req.params;
+    const {
+      identificador,
+      empresa,
+      responsable,
+      problematica,
+      servicios_realizados,
+      fecha,
+      hora_inicio,
+      hora_termino,
+      nivel_satisfaccion,
+      telefono_cliente,
+      nombre_encargado,
+      nombre_cliente,
+    } = req.body;
+
+    const problemaSolucionado = req.body.problema_solucionado === "true" ? 1 : 0;
+
+    const foto_inicio = req.files["foto_inicio"]
+      ? req.files["foto_inicio"][0].filename
+      : req.body.foto_inicio;
+    const foto_fin = req.files["foto_fin"]
+      ? req.files["foto_fin"][0].filename
+      : req.body.foto_fin;
+
+    const query = `
+      UPDATE ordenes
+      SET 
+        identificador = ?, empresa = ?, responsable = ?, problematica = ?, 
+        servicios_realizados = ?, fecha = ?, hora_inicio = ?, hora_termino = ?, 
+        nivel_satisfaccion = ?, telefono_cliente = ?, nombre_encargado = ?, 
+        nombre_cliente = ?, foto_inicio = COALESCE(?, foto_inicio), 
+        foto_fin = COALESCE(?, foto_fin)
+      WHERE id = ?`;
+
+    db.query(
+      query,
+      [
+        identificador,
+        empresa,
+        responsable,
+        problematica,
+        servicios_realizados,
+        fecha,
+        hora_inicio,
+        hora_termino,
+        nivel_satisfaccion,
+        telefono_cliente,
+        nombre_encargado,
+        nombre_cliente,
+        foto_inicio,
+        foto_fin,
+        id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error al actualizar la orden:", err);
+          res.status(500).send("Error al actualizar la orden.");
+        } else {
+          console.log("Orden actualizada con éxito", result);
+          res.redirect("/");
+        }
+      }
+    );
+  }
+);
 
 
 // Iniciar el servidor

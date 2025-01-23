@@ -96,6 +96,69 @@ exports.actualizarOrden = async (req, res) => {
   }
 };
 
+
+
+// Función para actualizar una orden existente
+exports.actualizarOrden = async (req, res) => {
+  const { id } = req.params;
+  const {
+    identificador,
+    empresa,
+    responsable,
+    problematica,
+    servicios_realizados,
+    fecha,
+    hora_inicio,
+    hora_termino,
+    nivel_satisfaccion,
+    problema_solucionado,
+    nombre_encargado,
+    nombre_cliente,
+    telefono_cliente,
+    foto_inicio,
+    foto_fin
+  } = req.body;
+
+  try {
+    // Buscar la orden a actualizar
+    const orden = await Orden.findByPk(id);
+    if (!orden) {
+      return res.status(404).send('Orden no encontrada');
+    }
+
+    // Si se subieron nuevas fotos, asignar las rutas correctas
+    const fotoInicio = req.files && req.files['foto_inicio'] ? req.files['foto_inicio'][0].filename : foto_inicio;
+    const fotoFin = req.files && req.files['foto_fin'] ? req.files['foto_fin'][0].filename : foto_fin;
+
+    // Actualizar la orden con los nuevos datos
+    await orden.update({
+      identificador,
+      empresa,
+      responsable,
+      problematica,
+      servicios_realizados,
+      fecha,
+      hora_inicio,
+      hora_termino,
+      nivel_satisfaccion,
+      problema_solucionado: problema_solucionado === 'on',
+      nombre_encargado,
+      nombre_cliente,
+      telefono_cliente,
+      foto_inicio: fotoInicio,
+      foto_fin: fotoFin,
+    });
+
+    // Redirigir a la lista de órdenes
+    res.redirect("/ordenes");
+  } catch (error) {
+    console.error("Error al actualizar la orden:", error);
+    res.status(500).send("Error al actualizar la orden.");
+  }
+};
+
+
+
 // Eliminar una orden por ID
 exports.eliminarOrden = async (req, res) => {
   try {

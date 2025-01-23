@@ -67,6 +67,77 @@ router.post('/ordenes', async (req, res) => {
   }
 });
 
+
+// Ruta para obtener los datos de la orden que se desea editar (GET)
+router.get('/ordenes/:id/editar', async (req, res) => {
+  try {
+    const orden = await Orden.findByPk(req.params.id); // Obtener la orden desde la base de datos
+    if (!orden) {
+      return res.status(404).send('Orden no encontrada');
+    }
+    res.render('editOrder', { orden }); // Renderizar la vista con los datos de la orden
+  } catch (err) {
+    console.error('Error al obtener la orden:', err);
+    res.status(500).send('Error al obtener la orden');
+  }
+});
+
+// Ruta para actualizar una orden existente (POST)
+router.post('/ordenes/:id/editar', upload, async (req, res) => {
+  const {
+    identificador,
+    empresa,
+    responsable,
+    problematica,
+    servicios_realizados,
+    fecha,
+    hora_inicio,
+    hora_termino,
+    nivel_satisfaccion,
+    problema_solucionado,
+    nombre_encargado,
+    nombre_cliente,
+    telefono_cliente,
+    foto_inicio,
+    foto_fin
+  } = req.body;
+
+  try {
+    const orden = await Orden.findByPk(req.params.id);
+    if (!orden) {
+      return res.status(404).send('Orden no encontrada');
+    }
+
+    // Si se subieron nuevas fotos, actualizar las rutas
+    const fotoInicio = req.files && req.files.foto_inicio ? req.files.foto_inicio[0].filename : foto_inicio;
+    const fotoFin = req.files && req.files.foto_fin ? req.files.foto_fin[0].filename : foto_fin;
+
+    await orden.update({
+      identificador,
+      empresa,
+      responsable,
+      problematica,
+      servicios_realizados,
+      fecha,
+      hora_inicio,
+      hora_termino,
+      nivel_satisfaccion,
+      problema_solucionado: problema_solucionado === 'on',
+      nombre_encargado,
+      nombre_cliente,
+      telefono_cliente,
+      foto_inicio: fotoInicio,
+      foto_fin: fotoFin
+    });
+
+    res.redirect('/ordenes'); // Redirigir al listado de órdenes
+  } catch (err) {
+    console.error('Error al actualizar la orden:', err);
+    res.status(500).send('Error al actualizar la orden');
+  }
+});
+
+
 // Ruta para eliminar una orden
 router.post('/ordenes/delete/:id', async (req, res) => {
   try {
