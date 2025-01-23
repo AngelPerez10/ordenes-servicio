@@ -136,23 +136,6 @@ app.post(
   }
 );
 
-// Ruta para mostrar el formulario de edición de una orden
-app.get("/ordenes/edit/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "SELECT * FROM ordenes WHERE id = ?";
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Error al obtener los datos de la orden:", err);
-      res.status(500).send("Error al obtener los datos de la orden.");
-    } else if (result.length === 0) {
-      res.status(404).send("Orden no encontrada.");
-    } else {
-      res.render("editOrder", { order: result[0] }); // Renderiza la vista con los datos de la orden
-    }
-  });
-});
-
 
 // Iniciar el servidor
 app.listen(3000, () => {
