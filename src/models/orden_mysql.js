@@ -4,11 +4,20 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = new Sequelize('ordenesdb', 'root', 'root', {
   host: 'localhost',
   dialect: 'mysql',
-  logging: false, // Desactivar el logging de SQL si no es necesario
+  logging: false, // Desactivar el logging SQL si no es necesario
 });
 
-// Definir el modelo
+// Definir el modelo de la tabla Orden
 const Orden = sequelize.define('Orden', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true, // Definir como clave primaria
+    autoIncrement: true, // Auto incrementa el valor del id
+  },
+  identificador: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   empresa: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -38,26 +47,38 @@ const Orden = sequelize.define('Orden', {
     allowNull: false,
   },
   nivel_satisfaccion: {
-    type: DataTypes.STRING,
-    allowNull: true,
+    type: DataTypes.ENUM('Malo', 'Regular', 'Bueno', 'Excelente'),
+    allowNull: false,
   },
   problema_solucionado: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  nombre_encargado: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   nombre_cliente: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  firma_cliente: {
-    type: DataTypes.STRING, // Asumiendo que la firma se guarda en base64
+  telefono_cliente: {
+    type: DataTypes.STRING(10), // Asumiendo que el teléfono tiene 10 dígitos
+    allowNull: true,
+  },
+  foto_inicio: {
+    type: DataTypes.STRING, // Asumiendo que se guarda el nombre o ruta del archivo
+    allowNull: true,
+  },
+  foto_fin: {
+    type: DataTypes.STRING, // Asumiendo que se guarda el nombre o ruta del archivo
     allowNull: true,
   },
 });
 
 // Sincronizar el modelo con la base de datos
-sequelize.sync()
-  .then(() => console.log('Modelo de orden sincronizado con la base de datos'))
+sequelize.sync({ alter: true })
+  .then(() => console.log('Modelo de Orden sincronizado con la base de datos'))
   .catch((err) => console.error('Error al sincronizar el modelo:', err));
 
 module.exports = Orden;

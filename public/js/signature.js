@@ -1,40 +1,102 @@
 window.onload = function () {
-    const canvas = document.getElementById('signatureCanvas');
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
+    const encargadoCanvas = document.getElementById('firma_encargado_canvas');
+    const clienteCanvas = document.getElementById('firma_cliente_canvas');
+    const encargadoCtx = encargadoCanvas.getContext('2d');
+    const clienteCtx = clienteCanvas.getContext('2d');
 
-    // Iniciar el dibujo
-    canvas.addEventListener('mousedown', function (e) {
-        drawing = true;
+    let drawingEncargado = false;
+    let drawingCliente = false;
+
+    // Configuración inicial del contexto
+    encargadoCtx.strokeStyle = 'black';
+    encargadoCtx.lineWidth = 2;
+
+    clienteCtx.strokeStyle = 'black';
+    clienteCtx.lineWidth = 2;
+
+    // Función para obtener las coordenadas reales del cursor
+    function getCursorPosition(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    // Función para iniciar el dibujo
+    function startDrawing(ctx, canvas, e) {
+        const pos = getCursorPosition(canvas, e);
         ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
+        ctx.moveTo(pos.x, pos.y);
+        return true;
+    }
 
-    // Dibujar mientras el ratón esté presionado
-    canvas.addEventListener('mousemove', function (e) {
+    // Función para dibujar en el lienzo
+    function draw(ctx, canvas, e, drawing) {
         if (drawing) {
-            ctx.lineTo(e.offsetX, e.offsetY);
+            const pos = getCursorPosition(canvas, e);
+            ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
+    }
+
+    // Eventos para el lienzo del encargado
+    encargadoCanvas.addEventListener('mousedown', (e) => {
+        drawingEncargado = startDrawing(encargadoCtx, encargadoCanvas, e);
     });
 
-    // Terminar el dibujo
-    canvas.addEventListener('mouseup', function () {
-        drawing = false;
+    encargadoCanvas.addEventListener('mousemove', (e) => {
+        draw(encargadoCtx, encargadoCanvas, e, drawingEncargado);
     });
 
-    // Limpiar el canvas
-    document.getElementById('clearSignature').addEventListener('click', function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    encargadoCanvas.addEventListener('mouseup', () => {
+        drawingEncargado = false;
     });
 
-    // Convertir la firma a imagen al enviar el formulario
-    document.getElementById('ordenForm').addEventListener('submit', function (e) {
-        const signatureData = canvas.toDataURL(); // Convertir el canvas a una URL de imagen en base64
-        const signatureInput = document.createElement('input');
-        signatureInput.type = 'hidden';
-        signatureInput.name = 'firma_cliente'; // El nombre que usarás en el backend
-        signatureInput.value = signatureData; // Guardar la firma en base64
-        this.appendChild(signatureInput);
+    // Eventos para el lienzo del cliente
+    clienteCanvas.addEventListener('mousedown', (e) => {
+        drawingCliente = startDrawing(clienteCtx, clienteCanvas, e);
+    });
+
+    clienteCanvas.addEventListener('mousemove', (e) => {
+        draw(clienteCtx, clienteCanvas, e, drawingCliente);
+    });
+
+    clienteCanvas.addEventListener('mouseup', () => {
+        drawingCliente = false;
+    });
+
+    // Limpiar lienzos
+    document.getElementById('clearEncargadoSignature').addEventListener('click', () => {
+        encargadoCtx.clearRect(0, 0, encargadoCanvas.width, encargadoCanvas.height);
+    });
+
+    document.getElementById('clearClienteSignature').addEventListener('click', () => {
+        clienteCtx.clearRect(0, 0, clienteCanvas.width, clienteCanvas.height);
+    });
+
+    // Convertir firmas a imágenes antes de enviar
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevenir el envío del formulario para evitar recarga de página
+
+        // Obtener las imágenes en formato base64
+        const encargadoSignature = encargadoCanvas.toDataURL();
+        const clienteSignature = clienteCanvas.toDataURL();
+
+        // Crear campos ocultos en el formulario para enviar las imágenes
+        const encargadoInput = document.createElement('input');
+        encargadoInput.type = 'hidden';
+        encargadoInput.name = 'firma_encargado';
+        encargadoInput.value = encargadoSignature;
+        this.appendChild(encargadoInput);
+
+        const clienteInput = document.createElement('input');
+        clienteInput.type = 'hidden';
+        clienteInput.name = 'firma_cliente';
+        clienteInput.value = clienteSignature;
+        this.appendChild(clienteInput);
+
+        // Enviar el formulario
+        this.submit();
     });
 };

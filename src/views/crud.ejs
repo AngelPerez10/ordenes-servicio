@@ -1,149 +1,199 @@
-<!-- Archivo: crud.ejs -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Listado de Órdenes</title>
-  <link rel="stylesheet" href="/css/desing_crud.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/desing_crud.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Listado de Órdenes</h1>
-      <button id="openModalButton" class="btn">+ Crear nueva orden</button>
+  <div class="container my-4">
+    <header class="d-flex justify-content-between align-items-center">
+      <h1 class="h3 text-primary">Listado de Órdenes</h1>
+      <button id="openModalButton" class="btn btn-primary">+ Crear nueva orden</button>
     </header>
 
-    <table class="modern-table" id="ordersTable">
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Responsable</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="ordersBody">
-        <!-- Aquí renderizas las órdenes con EJS -->
-        <% ordenes.forEach(function(order) { %>
+    <div class="table-responsive my-4">
+      <table class="table table-bordered table-striped">
+        <thead class="table-primary">
           <tr>
+            <th>Identificador</th>
+            <th>Empresa</th>
+            <th>Responsable</th>
+            <th>Problemática</th>
+            <th>Servicio Realizado</th>
+            <th>Fecha</th>
+            <th>Hora Inicio</th>
+            <th>Hora Término</th>
+            <th>Nivel de Satisfacción</th>
+            <th>Problema Solucionado</th>
+            <th>Encargado</th>
+            <th>Cliente</th>
+            <th>Telefono del Cliente</th>
+            <th>Foto de Inicio</th>
+            <th>Foto de Fin</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <% ordenes.forEach(function(order) { %>
+          <tr>
+            <td><%= order.identificador %></td>
             <td><%= order.empresa %></td>
             <td><%= order.responsable %></td>
+            <td><%= order.problematica %></td>
+            <td><%= order.servicios_realizados %></td>
             <td><%= new Date(order.fecha).toLocaleDateString() %></td>
+            <td><%= order.hora_inicio %></td>
+            <td><%= order.hora_termino %></td>
+            <td><%= order.nivel_satisfaccion %></td>
+            <td><%= order.problema_solucionado ? 'Sí' : 'No' %></td>
+            <td><%= order.nombre_cliente %></td>
+            <td><%= order.telefono_cliente %></td>
+
             <td>
-              <a href="/ordenes/edit/<%= order.id %>" class="edit-btn">Editar</a>
-              <form action="/ordenes/delete/<%= order.id %>" method="POST" style="display:inline;">
-                <button type="submit" class="delete-btn">Eliminar</button>
-              </form>
+              <% if (order.foto_inicio) { %>
+                <img src="/uploads/<%= order.foto_inicio %>" alt="Foto de Inicio" class="img-thumbnail" style="max-width: 100px;" id="foto_inicio" name="foto_inicio"> 
+              <% } else { %>
+                No disponible
+              <% } %>
+            </td>
+            <td>
+              <% if (order.foto_fin) { %>
+                <img src="/uploads/<%= order.foto_fin %>" alt="Foto de Fin" class="img-thumbnail" style="max-width: 100px;" id="foto_fin" name="foto_fin">
+              <% } else { %>
+                No disponible
+              <% } %>
+            </td>
+
+            <td>
+              <div class="d-flex gap-2">
+                <a href="/ordenes/edit/<%= order.id %>" class="btn btn-sm btn-warning">Editar</a>
+                <form action="/ordenes/delete/<%= order.id %>" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+              </div>
             </td>
           </tr>
-        <% }); %>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Ventana Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Nueva Orden</h2>
-        <button class="close-btn" id="closeModalButton">&times;</button>
-      </div>
-      <form id="orderForm" action="/ordenes" method="POST">
-        <div class="form-group">
-          <label for="empresa">Empresa:</label>
-          <input type="text" id="empresa" name="empresa" required>
-        </div>
-        <div class="form-group">
-          <label for="responsable">Responsable:</label>
-          <input type="text" id="responsable" name="responsable" required>
-        </div>
-        <div class="form-group">
-          <label for="problematica">Problemática:</label>
-          <textarea id="problematica" name="problematica" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="servicios_realizados">Servicios Realizados:</label>
-          <textarea id="servicios_realizados" name="servicios_realizados" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha" name="fecha" required>
-        </div>
-        <div class="form-group">
-          <label for="hora_inicio">Hora de Inicio:</label>
-          <input type="time" id="hora_inicio" name="hora_inicio" required>
-        </div>
-        <div class="form-group">
-          <label for="hora_termino">Hora de Término:</label>
-          <input type="time" id="hora_termino" name="hora_termino" required>
-        </div>
-        <div class="form-group">
-          <label for="nivel_satisfaccion">Nivel de Satisfacción:</label>
-          <select id="nivel_satisfaccion" name="nivel_satisfaccion" required>
-            <option value=""></option>
-            <option value="Malo">Malo</option>
-            <option value="Regular">Regular</option>
-            <option value="Bueno">Bueno</option>
-            <option value="Excelente">Excelente</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="problema_solucionado">Problema Solucionado:</label>
-          <input type="checkbox" id="problema_solucionado" name="problema_solucionado">
-        </div>
-        <div class="form-group">
-          <label for="nombre_cliente">Nombre del Cliente:</label>
-          <input type="text" id="nombre_cliente" name="nombre_cliente" required>
-        </div>
-        <div class="form-group">
-          <label for="firma_cliente">Firma del Cliente:</label>
-          <div id="signature-pad">
-            <canvas id="signatureCanvas" width="400" height="150"></canvas>
-          </div>
-          <input type="hidden" name="firma_cliente" id="firma_cliente" />
-        </div>
-        <button type="submit" class="btn-submit">Guardar</button>
-      </form>
+          <% }); %>
+        </tbody>
+      </table>
     </div>
   </div>
 
+  <!-- Modal -->
+  <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderModalLabel">Nueva Orden</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="orderForm" action="/ordenes" method="POST" enctype="multipart/form-data">
+          <div class="modal-body">
+
+            <div class="col-md-6">
+              <label for="identificador" class="form-label">Identificador:</label>
+              <select id="identificador" name="identificador" class="form-select" required>
+                <option value="H">H</option>
+                <option value="Q">Q</option>
+                <option value="M">M</option>
+              </select>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="empresa" class="form-label">Empresa:</label>
+                <input type="text" id="empresa" name="empresa" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="responsable" class="form-label">Responsable:</label>
+                <input type="text" id="responsable" name="responsable" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label for="problematica" class="form-label">Problemática:</label>
+                <textarea id="problematica" name="problematica" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="col-12">
+                <label for="servicios" class="form-label">Servicios Realizados:</label>
+                <textarea id="servicios" name="servicios_realizados" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="col-md-4">
+                <label for="fecha" class="form-label">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label for="hora_inicio" class="form-label">Hora de Inicio:</label>
+                <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label for="hora_termino" class="form-label">Hora de Término:</label>
+                <input type="time" id="hora_termino" name="hora_termino" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="nivel_satisfaccion" class="form-label">Nivel de Satisfacción:</label>
+                <select id="nivel_satisfaccion" name="nivel_satisfaccion" class="form-select" required>
+                  <option value="Malo">Malo</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Bueno">Bueno</option>
+                  <option value="Excelente">Excelente</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="nombre_encargado" class="form-label">Nombre del Encargado:</label>
+                <input type="text" id="nombre_encargado" name="nombre_encargado" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="nombre_cliente" class="form-label">Nombre del Cliente:</label>
+                <input type="text" id="nombre_cliente" name="nombre_cliente" class="form-control" required>
+              </div>              
+
+              <div class="col-md-6">
+                <label for="telefono_cliente" class="form-label">Teléfono del Cliente:</label>
+                <input type="tel" id="telefono_cliente" name="telefono_cliente" class="form-control" maxlength="10" pattern="[0-9]{10}" required>
+                <small class="form-text text-muted">Ingrese un teléfono de 10 dígitos.</small>
+              </div>
+
+              <div class="col-md-6">
+                <label for="foto_inicio" class="form-label">Foto de Inicio:</label>
+                <input type="file" id="foto_inicio" name="foto_inicio" class="form-control" accept="image/*" required>
+              </div>
+              <div class="col-md-6">
+                <label for="foto_fin" class="form-label">Foto de Fin:</label>
+                <input type="file" id="foto_fin" name="foto_fin" class="form-control" accept="image/*" required>
+              </div>              
+              
+            </div>
+            <br>
+            <div class="col-md-6">
+              <label for="problema_solucionado" class="form-label">Problema Solucionado:</label>
+              <div class="form-check">
+                <input type="checkbox" id="problema_solucionado" name="problema_solucionado" class="form-check-input" value="true">
+                <label class="form-check-label" for="problema_solucionado">Sí</label>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/signature.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Mostrar la ventana modal para crear una nueva orden
-    document.getElementById("openModalButton").addEventListener("click", () => {
-      document.getElementById("modal").classList.add("show");
-    });
-
-    // Cerrar la ventana modal
-    document.getElementById("closeModalButton").addEventListener("click", () => {
-      document.getElementById("modal").classList.remove("show");
-    });
-
-    // Función para capturar la firma
-    const canvas = document.getElementById('signatureCanvas');
-    const context = canvas.getContext('2d');
-    let isDrawing = false;
-
-    canvas.addEventListener('mousedown', (event) => {
-      isDrawing = true;
-      context.moveTo(event.offsetX, event.offsetY);
-    });
-
-    canvas.addEventListener('mousemove', (event) => {
-      if (isDrawing) {
-        context.lineTo(event.offsetX, event.offsetY);
-        context.stroke();
-      }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-      isDrawing = false;
-      document.getElementById('firma_cliente').value = canvas.toDataURL(); // Guarda la firma en base64
-    });
-
-    canvas.addEventListener('mouseout', () => {
-      isDrawing = false;
+    document.getElementById('openModalButton').addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('orderModal'));
+      modal.show();
     });
   </script>
 </body>

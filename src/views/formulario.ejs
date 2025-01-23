@@ -3,94 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orden de Servicio</title>
+  <title>Formulario de Registro de Orden</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/desing_form.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Orden de Servicio</h1>
-    </header>
-
-    <section class="form-section">
-      <h2>Detalles de la Orden</h2>
-      <form action="/ordenes" method="POST" id="ordenForm">
-        <div class="form-group">
-          <label for="empresa">Empresa:</label>
-          <input type="text" id="empresa" name="empresa" required>
+  <div class="container my-5">
+    <h1 class="text-center text-primary">Registro de Orden</h1>
+    <p class="text-center text-muted">Por favor, llena los campos para registrar tu orden de servicio.</p>
+    <form action="/ordenes" method="POST" enctype="multipart/form-data" class="row g-4">
+      <!-- Identificador -->
+      <div class="col-md-6">
+        <label for="identificador" class="form-label">Identificador:</label>
+        <select id="identificador" name="identificador" class="form-select" required>
+          <option value="H">H</option>
+          <option value="Q">Q</option>
+          <option value="M">M</option>
+        </select>
+      </div>
+      <!-- Empresa -->
+      <div class="col-md-6">
+        <label for="empresa" class="form-label">Empresa:</label>
+        <input type="text" id="empresa" name="empresa" class="form-control" required>
+      </div>
+      <!-- Responsable -->
+      <div class="col-md-6">
+        <label for="responsable" class="form-label">Responsable:</label>
+        <input type="text" id="responsable" name="responsable" class="form-control" required>
+      </div>
+      <!-- Problemática -->
+      <div class="col-md-12">
+        <label for="problematica" class="form-label">Problemática:</label>
+        <textarea id="problematica" name="problematica" class="form-control" rows="3" required></textarea>
+      </div>
+      <!-- Servicios Realizados -->
+      <div class="col-md-12">
+        <label for="servicios_realizados" class="form-label">Servicios Realizados:</label>
+        <textarea id="servicios_realizados" name="servicios_realizados" class="form-control" rows="3" required></textarea>
+      </div>
+      <!-- Fecha -->
+      <div class="col-md-4">
+        <label for="fecha" class="form-label">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" class="form-control" required>
+      </div>
+      <!-- Hora de Inicio -->
+      <div class="col-md-4">
+        <label for="hora_inicio" class="form-label">Hora de Inicio:</label>
+        <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" required>
+      </div>
+      <!-- Hora de Término -->
+      <div class="col-md-4">
+        <label for="hora_termino" class="form-label">Hora de Término:</label>
+        <input type="time" id="hora_termino" name="hora_termino" class="form-control" required>
+      </div>
+      <!-- Nivel de Satisfacción -->
+      <div class="col-md-6">
+        <label for="nivel_satisfaccion" class="form-label">Nivel de Satisfacción:</label>
+        <select id="nivel_satisfaccion" name="nivel_satisfaccion" class="form-select" required>
+          <option value="Malo">Malo</option>
+          <option value="Regular">Regular</option>
+          <option value="Bueno">Bueno</option>
+          <option value="Excelente">Excelente</option>
+        </select>
+      </div>
+      <!-- Encargado -->
+      <div class="col-md-6">
+        <label for="nombre_encargado" class="form-label">Nombre del Encargado:</label>
+        <input type="text" id="nombre_encargado" name="nombre_encargado" class="form-control" required>
+      </div>
+      <!-- Cliente -->
+      <div class="col-md-6">
+        <label for="nombre_cliente" class="form-label">Nombre del Cliente:</label>
+        <input type="text" id="nombre_cliente" name="nombre_cliente" class="form-control" required>
+      </div>
+      <!-- Teléfono del Cliente -->
+      <div class="col-md-6">
+        <label for="telefono_cliente" class="form-label">Teléfono del Cliente:</label>
+        <input type="tel" id="telefono_cliente" name="telefono_cliente" class="form-control" maxlength="10" pattern="[0-9]{10}" required>
+        <small class="form-text text-muted">Ingrese un teléfono de 10 dígitos.</small>
+      </div>
+      <!-- Firma del Encargado -->
+      <div class="col-md-6">
+        <label for="firma_encargado" class="form-label">Firma del Encargado:</label>
+        <canvas id="firma_encargado_canvas"></canvas>
+        <button type="button" class="btn btn-secondary btn-clear" id="clearEncargadoSignature">Limpiar Firma</button>
+        <input type="hidden" id="firma_encargado" name="firma_encargado">
+      </div>
+      <!-- Firma del Cliente -->
+      <div class="col-md-6">
+        <label for="firma_cliente" class="form-label">Firma del Cliente:</label>
+        <canvas id="firma_cliente_canvas"></canvas>
+        <button type="button" class="btn btn-secondary btn-clear" id="clearClienteSignature">Limpiar Firma</button>
+        <input type="hidden" id="firma_cliente" name="firma_cliente">
+      </div>
+      <!-- Foto de Inicio -->
+      <div class="col-md-6">
+        <label for="foto_inicio" class="form-label">Foto de Inicio:</label>
+        <input type="file" id="foto_inicio" name="foto_inicio" class="form-control" accept="image/*" required>
+      </div>
+      <!-- Foto de Fin -->
+      <div class="col-md-6">
+        <label for="foto_fin" class="form-label">Foto de Fin:</label>
+        <input type="file" id="foto_fin" name="foto_fin" class="form-control" accept="image/*" required>
+      </div>
+      <!-- Problema Solucionado -->
+      <div class="col-md-12">
+        <label for="problema_solucionado" class="form-label">Problema Solucionado:</label>
+        <div class="form-check">
+          <input type="checkbox" id="problema_solucionado" name="problema_solucionado" class="form-check-input" value="true">
+          <label class="form-check-label" for="problema_solucionado">Sí</label>
         </div>
-      
-        <div class="form-group">
-          <label for="responsable">Responsable:</label>
-          <input type="text" id="responsable" name="responsable" required>
-        </div>
-      
-        <div class="form-group">
-          <label for="problematica">Problemática:</label>
-          <textarea id="problematica" name="problematica" required></textarea>
-        </div>
-      
-        <div class="form-group">
-          <label for="servicios_realizados">Servicios Realizados:</label>
-          <textarea id="servicios_realizados" name="servicios_realizados" required></textarea>
-        </div>
-      
-        <div class="form-group">
-          <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha" name="fecha" required>
-        </div>
-      
-        <div class="form-group">
-          <label for="hora_inicio">Hora de Inicio:</label>
-          <input type="time" id="hora_inicio" name="hora_inicio" required>
-        </div>
-      
-        <div class="form-group">
-          <label for="hora_termino">Hora de Término:</label>
-          <input type="time" id="hora_termino" name="hora_termino" required>
-        </div>
-      
-        <div class="form-group">
-          <label for="nivel_satisfaccion">Nivel de Satisfacción:</label>
-          <select id="nivel_satisfaccion" name="nivel_satisfaccion" required>
-            <option></option>
-            <option value="Malo">Malo</option>
-            <option value="Regular">Regular</option>
-            <option value="Bueno">Bueno</option>
-            <option value="Excelente">Excelente</option>
-          </select>
-        </div>
-      
-        <div class="form-group">
-          <label for="problema_solucionado">Problema Solucionado:</label>
-          <input type="checkbox" id="problema_solucionado" name="problema_solucionado">
-        </div>
-      
-        <div class="form-group">
-          <label for="nombre_cliente">Nombre del Cliente:</label>
-          <input type="text" id="nombre_cliente" name="nombre_cliente" required>
-        </div>
-      
-        <div class="form-group">
-          <label for="firma_cliente">Firma del Cliente:</label>
-          <div id="signature-pad">
-            <canvas id="signatureCanvas" width="400" height="150"></canvas>
-            <button type="button" id="clearSignature">Limpiar Firma</button>
-          </div>
-        </div>
-      
-        <button type="submit" class="btn-submit">Guardar</button>
-      </form>
-      
-    </section>
-
-    <footer>
-      <p>© 2025 Ordenes de Servicio - Todos los derechos reservados.</p>
-    </footer>
+      </div>
+      <!-- Botones -->
+      <div class="col-12 text-center">
+        <button type="submit" class="btn btn-primary">Registrar Orden</button>
+        <button type="reset" class="btn btn-secondary">Limpiar</button>
+      </div>
+    </form>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/signature.js"></script>
 </body>
 </html>
