@@ -8,15 +8,15 @@ ordenes-servicio/          # Carpeta raíz del proyecto
 │   └── images/            # Imágenes
 ├── src/                   # Código fuente del proyecto
 │   ├── config/            # Configuración de la base de datos y otras configuraciones
-│   │   └── db.js          # Conexión a MongoDB
+│   │   └── db.js          
 │   ├── controllers/       # Lógica de negocio
 │   │   └── ordenesController.js # Controlador para manejar órdenes
 │   ├── models/            # Modelos de datos (esquemas de Mongoose)
-│   │   └── ordenModel.js       # Esquema de "Orden" para MongoDB
+│   │   └── orden_mysql.js       # Esquema de "Orden" para MongoDB
 │   ├── routes/            # Rutas de la aplicación
 │   │   └── ordenesRoutes.js # Rutas relacionadas con órdenes de servicio
 │   ├── views/             # Plantillas de vistas (si usas un motor como EJS, Pug, etc.)│   │   
-│   │   └── crud.ejs    # Página de órdenes de servicio
+│   │   └── crud.ejs
 │   └── app.js             # Archivo principal de la aplicación
 ├── .env                   # Variables de entorno
 ├── .gitignore             # Archivos a ignorar por Git

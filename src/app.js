@@ -8,30 +8,31 @@ const bodyParser = require("body-parser");
 
 // Crear la aplicación Express
 const app = express();
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "../public"))); // Servir los archivos estáticos correctamente
 
-// Crear la carpeta 'uploads' si no existe
-const uploadDir = path.join(__dirname, "public", "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  console.log("Carpeta uploads creada.");
+// Ruta absoluta a la carpeta public/uploads (desde la raíz del proyecto)
+const uploadsDir = path.join(__dirname, "../public/uploads");
+
+// Crear la carpeta "public/uploads" si no existe
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Configuración de almacenamiento para Multer
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir); // Carpeta donde se guardarán los archivos
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir); // Carpeta donde se guardarán los archivos
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    cb(null, uniqueSuffix + "-" + file.originalname);
   },
 });
 
-// Configuración de Multer para el manejo de archivos
+// Configuración de Multer para usar este almacenamiento
 const upload = multer({ storage: storage });
 
-// Conexión a la base de datos (configura tu base de datos correctamente)
+// Conexión a la base de datos
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -47,8 +48,8 @@ db.connect((err) => {
 // Configuración de bodyParser para procesar datos POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
 
+// Configuración del motor de vistas
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
@@ -59,8 +60,7 @@ app.get("/", (req, res) => {
       console.error("Error al obtener las órdenes:", err);
       res.status(500).send("Error al obtener las órdenes.");
     } else {
-      //res.render("formulario", { ordenes: result }); //Renderizar formulario.ejs
-      res.render("crud", { ordenes: result }); // Renderizar crud.ejs
+      res.render("crud", { ordenes: result });
     }
   });
 });
@@ -85,13 +85,12 @@ app.post(
       nivel_satisfaccion,
       problema_solucionado,
       telefono_cliente,
-      nombre_encargado, // Nuevo campo
-      nombre_cliente, // Nuevo campo
+      nombre_encargado,
+      nombre_cliente,
     } = req.body;
 
     const problemaSolucionado = problema_solucionado === "true" ? 1 : 0;
 
-    // Verificar si se han subido los archivos
     const foto_inicio = req.files["foto_inicio"]
       ? req.files["foto_inicio"][0].filename
       : null;
@@ -99,13 +98,12 @@ app.post(
       ? req.files["foto_fin"][0].filename
       : null;
 
-    // Guardar en la base de datos
     const query = `
-  INSERT INTO ordenes (
-    identificador, empresa, responsable, problematica, servicios_realizados, 
-    fecha, hora_inicio, hora_termino, nivel_satisfaccion, problema_solucionado,
-    telefono_cliente, nombre_encargado, nombre_cliente, foto_inicio, foto_fin
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    INSERT INTO ordenes (
+      identificador, empresa, responsable, problematica, servicios_realizados, 
+      fecha, hora_inicio, hora_termino, nivel_satisfaccion, problema_solucionado,
+      telefono_cliente, nombre_encargado, nombre_cliente, foto_inicio, foto_fin
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     db.query(
       query,
@@ -119,12 +117,12 @@ app.post(
         hora_inicio,
         hora_termino,
         nivel_satisfaccion,
-        problema_solucionado,
+        problemaSolucionado,
         telefono_cliente,
         nombre_encargado,
         nombre_cliente,
         foto_inicio,
-        foto_fin
+        foto_fin,
       ],
       (err, result) => {
         if (err) {
@@ -135,9 +133,25 @@ app.post(
         }
       }
     );
-
   }
 );
+
+// Ruta para mostrar el formulario de edición de una orden
+app.get("/ordenes/edit/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = "SELECT * FROM ordenes WHERE id = ?";
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error al obtener los datos de la orden:", err);
+      res.status(500).send("Error al obtener los datos de la orden.");
+    } else if (result.length === 0) {
+      res.status(404).send("Orden no encontrada.");
+    } else {
+      res.render("editOrder", { order: result[0] }); // Renderiza la vista con los datos de la orden
+    }
+  });
+});
 
 
 // Iniciar el servidor
